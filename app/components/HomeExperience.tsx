@@ -2,422 +2,396 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { posts, toolsDirectory } from "../content";
-import { SiteFooter } from "./GlobalChrome";
+import { posts } from "../content";
 
-const navItems = [
-  ["Câu chuyện", "#story"],
-  ["Hành trình ERP", "#erp"],
-  ["Dự án", "#work"],
-  ["Bài viết", "/blog"],
-  ["Công cụ", "/tools"],
+const roles = [
+  {
+    no: "01",
+    label: "OPERATIONS",
+    title: "Người vận hành",
+    text: "Tôi đứng ở nơi mọi thứ va vào nhau: con người, hàng hóa, tiến độ, chi phí và những ngoại lệ không nằm trong quy trình.",
+    image: "/characters/multitask.webp",
+    tone: "volt",
+  },
+  {
+    no: "02",
+    label: "SYSTEM",
+    title: "Người xây ERP",
+    text: "Tôi biến các nút thắt thành dữ liệu, biến dữ liệu thành luồng công việc, rồi để hệ thống giữ nhịp cho cả tổ chức.",
+    image: "/characters/erp-builder.webp",
+    tone: "cyan",
+  },
+  {
+    no: "03",
+    label: "EVERYDAY",
+    title: "Một người bình thường",
+    text: "Sau màn hình vẫn là một người nấu cơm, chăm con, đọc sách và học tiếp. Công nghệ có ý nghĩa khi trả lại thời gian cho đời sống.",
+    image: "/characters/kitchen.webp",
+    tone: "ember",
+  },
+  {
+    no: "04",
+    label: "FATHER",
+    title: "Người cha",
+    text: "Kiên nhẫn, quan sát và có mặt. Những bài học quan trọng nhất về thiết kế hệ thống đôi khi không đến từ phòng họp.",
+    image: "/characters/father.webp",
+    tone: "ice",
+  },
 ];
 
-const timeline = [
-  { year: "01", title: "Nhìn thấy nút thắt", text: "Báo cáo đến muộn, dữ liệu nằm rải rác và rất nhiều việc phải nhớ bằng đầu." },
-  { year: "02", title: "Chuẩn hóa quy trình", text: "Tách công việc thành trạng thái, trách nhiệm, dữ liệu đầu vào và điều kiện hoàn tất." },
-  { year: "03", title: "Đưa ERP vào lõi", text: "ERPNext trở thành nơi kết nối bán hàng, kho, mua hàng, kế toán, sản xuất và nhân sự." },
-  { year: "04", title: "Nối thêm automation", text: "n8n, API, BI và AI xử lý phần lặp lại để con người tập trung vào ngoại lệ và quyết định." },
+const erpSteps = [
+  {
+    no: "01",
+    kicker: "THE FRICTION",
+    title: "Nhìn thấy\nđiểm nghẽn.",
+    text: "Báo cáo đến muộn. Dữ liệu nằm rải rác. Mỗi người giữ một phiên bản sự thật và quá nhiều việc phụ thuộc vào trí nhớ.",
+    metric: "1×",
+    metricText: "sự thật vận hành",
+  },
+  {
+    no: "02",
+    kicker: "THE MODEL",
+    title: "Đặt lại\ntrật tự.",
+    text: "Tách mỗi công việc thành đầu vào, người chịu trách nhiệm, trạng thái, điều kiện hoàn tất và dữ liệu cần để ra quyết định.",
+    metric: "06",
+    metricText: "phân hệ lõi",
+  },
+  {
+    no: "03",
+    kicker: "THE CORE",
+    title: "Đưa ERP\nvào trung tâm.",
+    text: "Bán hàng, kho, mua hàng, kế toán, sản xuất và nhân sự cùng chạy trên một nhịp dữ liệu thay vì sáu hòn đảo riêng biệt.",
+    metric: "360°",
+    metricText: "dòng chảy dữ liệu",
+  },
+  {
+    no: "04",
+    kicker: "THE LEVERAGE",
+    title: "Nối thêm\ntrí tuệ.",
+    text: "API, n8n, BI và AI xử lý phần lặp lại. Con người chuyển từ nhập liệu sang giải quyết ngoại lệ và đưa ra quyết định.",
+    metric: "∞",
+    metricText: "khả năng mở rộng",
+  },
 ];
 
 const projects = [
-  { code: "OPS/01", title: "ERPNext tại nhà máy", text: "Một lõi dữ liệu chung cho bán hàng, kho, kế toán, mua hàng, sản xuất và chấm công.", tag: "SYSTEM", className: "project-primary" },
-  { code: "AI/02", title: "PO Reader", text: "Đọc đơn đặt hàng siêu thị, chuẩn hóa mã hàng và đưa dữ liệu vào ERP.", tag: "AI × ERP", className: "project-acid" },
-  { code: "SAAS/03", title: "npp.sale", text: "Thử nghiệm một cách đặt hàng và quản trị nhà phân phối gọn hơn cho FMCG.", tag: "PRODUCT", className: "project-paper" },
-  { code: "DATA/04", title: "Operations BI", text: "Biến dữ liệu bán hàng, tồn kho và công nợ thành tín hiệu có thể hành động.", tag: "DATA", className: "project-cyan" },
-  { code: "LAB/05", title: "1nguoi.com", text: "Ghi lại cách một người dùng hệ thống, AI và tinh thần học liên tục để làm việc lớn hơn.", tag: "BUILD IN PUBLIC", className: "project-orange" },
+  ["ERP CORE", "Nhà máy vận hành trên một lõi dữ liệu", "ERPNext / Frappe", "01"],
+  ["PO READER", "Biến đơn đặt hàng thành dữ liệu có cấu trúc", "AI / AUTOMATION", "02"],
+  ["NPP.SALE", "Cách đặt hàng gọn hơn cho nhà phân phối", "PRODUCT / FMCG", "03"],
+  ["OPS BI", "Tín hiệu hành động từ doanh số và tồn kho", "DATA / DECISION", "04"],
 ];
 
-function AmbientField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let frame = 0;
-    let width = 0;
-    let height = 0;
-    let dpr = 1;
-    const pointer = { x: 0.72, y: 0.34 };
-    const dots = Array.from({ length: reduceMotion ? 28 : 58 }, (_, index) => ({
-      x: (index * 0.61803398875) % 1,
-      y: (index * 0.41421356237) % 1,
-      radius: 0.7 + (index % 4) * 0.4,
-      speed: 0.00008 + (index % 7) * 0.000015,
-      phase: index * 0.72,
-    }));
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = rect.width;
-      height = rect.height;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const onPointer = (event: PointerEvent) => {
-      pointer.x = event.clientX / window.innerWidth;
-      pointer.y = event.clientY / window.innerHeight;
-    };
-
-    const draw = (time: number) => {
-      context.clearRect(0, 0, width, height);
-      const positions = dots.map((dot) => ({
-        x: dot.x * width + Math.sin(time * dot.speed + dot.phase) * 18 + (pointer.x - 0.5) * 14,
-        y: dot.y * height + Math.cos(time * dot.speed * 0.8 + dot.phase) * 16 + (pointer.y - 0.5) * 10,
-        radius: dot.radius,
-      }));
-
-      for (let i = 0; i < positions.length; i += 1) {
-        const a = positions[i];
-        for (let j = i + 1; j < positions.length; j += 1) {
-          const b = positions[j];
-          const distance = Math.hypot(a.x - b.x, a.y - b.y);
-          if (distance < 128) {
-            context.beginPath();
-            context.moveTo(a.x, a.y);
-            context.lineTo(b.x, b.y);
-            context.strokeStyle = `rgba(44, 96, 120, ${0.12 * (1 - distance / 128)})`;
-            context.lineWidth = 0.7;
-            context.stroke();
-          }
-        }
-        context.beginPath();
-        context.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
-        context.fillStyle = "rgba(18, 61, 75, .28)";
-        context.fill();
-      }
-
-      if (!reduceMotion) frame = requestAnimationFrame(draw);
-    };
-
-    resize();
-    draw(0);
-    if (!reduceMotion) frame = requestAnimationFrame(draw);
-    window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", onPointer, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onPointer);
-    };
-  }, []);
-
-  return <canvas className="ambient-field" ref={canvasRef} aria-hidden="true" />;
+function clamp(value: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function SiteHeader() {
-  const [menuOpen, setMenuOpen] = useState(false);
+function chapterOpacity(progress: number, index: number, count: number) {
+  const center = index / (count - 1);
+  const distance = Math.abs(progress - center);
+  return clamp(1 - distance * (count - 1) * 1.45);
+}
+
+function useScrollScene() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+
+    const update = () => {
+      raf = 0;
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      root.style.setProperty("--page-p", String(clamp(window.scrollY / max)));
+
+      document.querySelectorAll<HTMLElement>("[data-scroll-scene]").forEach((scene) => {
+        const rect = scene.getBoundingClientRect();
+        const travel = Math.max(1, scene.offsetHeight - window.innerHeight);
+        const progress = reduced ? 0 : clamp(-rect.top / travel);
+        scene.style.setProperty("--p", String(progress));
+        scene.style.setProperty("--enter", String(clamp(progress * 4)));
+        scene.style.setProperty("--leave", String(clamp((progress - 0.72) * 4.2)));
+
+        const count = Number(scene.dataset.steps || 0);
+        for (let index = 0; index < count; index += 1) {
+          scene.style.setProperty(`--step-${index}`, String(chapterOpacity(progress, index, count)));
+        }
+      });
+
+      document.querySelectorAll<HTMLElement>("[data-rise]").forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        const visible = clamp((window.innerHeight - rect.top) / Math.min(window.innerHeight * 0.55, 520));
+        node.style.setProperty("--visible", String(visible));
+      });
+    };
+
+    const requestUpdate = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, []);
+}
+
+function PointerGlow() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const move = (event: PointerEvent) => {
+      root.style.setProperty("--pointer-x", `${event.clientX}px`);
+      root.style.setProperty("--pointer-y", `${event.clientY}px`);
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    return () => window.removeEventListener("pointermove", move);
+  }, []);
+  return <div className="os-pointer-glow" aria-hidden="true" />;
+}
+
+function Header() {
+  const [open, setOpen] = useState(false);
   return (
-    <header className="site-header">
-      <Link className="brand-mark" href="/" aria-label="1 Người — Trang chủ">
-        <span>1</span>
-        <span>NGƯỜI</span>
+    <header className="os-header">
+      <Link href="/" className="os-logo" aria-label="1 Người — Trang chủ">
+        <span>1</span><b>NGƯỜI</b><i>®</i>
       </Link>
-      <nav className={menuOpen ? "main-nav is-open" : "main-nav"} aria-label="Điều hướng chính">
-        {navItems.map(([label, href]) => (
-          <Link key={label} href={href} onClick={() => setMenuOpen(false)}>{label}</Link>
-        ))}
+      <nav className={open ? "os-nav is-open" : "os-nav"} aria-label="Điều hướng chính">
+        <a href="#identity" onClick={() => setOpen(false)}>Câu chuyện</a>
+        <a href="#system" onClick={() => setOpen(false)}>Hành trình ERP</a>
+        <a href="#work" onClick={() => setOpen(false)}>Công việc</a>
+        <Link href="/blog" onClick={() => setOpen(false)}>Tạp chí</Link>
+        <Link href="/tools" onClick={() => setOpen(false)}>Công cụ</Link>
       </nav>
-      <div className="header-actions">
-        <span className="live-note"><i /> Đang xây mỗi ngày</span>
-        <button
-          className="menu-toggle"
-          type="button"
-          aria-label={menuOpen ? "Đóng menu" : "Mở menu"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((value) => !value)}
-        >
-          <span />
-          <span />
-        </button>
-      </div>
+      <div className="os-header-meta"><i /><span>BUILDING IN PUBLIC</span></div>
+      <button className="os-menu" type="button" aria-label="Mở menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+        <span /><span />
+      </button>
     </header>
   );
 }
 
-function ScrollCue() {
+function ScrollProgress() {
   return (
-    <a className="scroll-cue" href="#story" aria-label="Cuộn xuống đọc câu chuyện">
-      <span>CUỘN ĐỂ KHÁM PHÁ</span>
-      <i />
-    </a>
+    <aside className="os-progress" aria-hidden="true">
+      <span>00</span><div><i /></div><span>100</span>
+    </aside>
   );
 }
 
-export default function HomeExperience() {
-  const heroRef = useRef<HTMLDivElement>(null);
+function Portal() {
+  return (
+    <section className="os-portal" data-scroll-scene id="identity">
+      <div className="os-portal-sticky">
+        <div className="os-space" aria-hidden="true"><i /><i /><i /></div>
+        <div className="os-portal-number" aria-hidden="true">1</div>
+        <div className="os-coordinates" aria-hidden="true"><span>20°51′N / 106°41′E</span><b>HAI PHONG — VN</b></div>
 
-  useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("is-visible")),
-      { threshold: 0.14 },
-    );
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, []);
+        <div className="os-portal-copy">
+          <p><span>HUMAN OPERATING SYSTEM</span> / NGUYỄN HUY CHIẾN</p>
+          <h1>
+            <span>MỘT</span>
+            <span>NGƯỜI</span>
+            <em>NHIỀU HỆ THỐNG.</em>
+          </h1>
+          <div className="os-portal-intro">
+            <b>01 — TUYÊN NGÔN</b>
+            <p>Tôi dùng công nghệ để công việc bớt phụ thuộc vào trí nhớ — và để một người có thể tạo ra nhiều giá trị hơn.</p>
+          </div>
+        </div>
 
-  const moveHero = (event: React.PointerEvent<HTMLDivElement>) => {
+        <div className="os-avatar-rig" aria-hidden="true">
+          <div className="os-ring ring-a"><i /><i /><i /><i /></div>
+          <div className="os-ring ring-b" />
+          <div className="os-avatar-aura" />
+          <img src="/characters/multitask.webp" alt="" width={1024} height={1536} />
+          <div className="os-tag tag-one"><i>01</i><span>ERP BUILDER</span></div>
+          <div className="os-tag tag-two"><i>02</i><span>OPS THINKER</span></div>
+          <div className="os-tag tag-three"><i>03</i><span>FATHER / MAKER</span></div>
+        </div>
+
+        <div className="os-scroll-command"><span>SCROLL TO ENTER</span><i><b /></i></div>
+        <div className="os-portal-exit" aria-hidden="true">
+          <span>KHÔNG PHẢI SIÊU NHÂN.</span>
+          <strong>CHỈ LÀ MỘT NGƯỜI<br />BIẾT DÙNG ĐÒN BẨY.</strong>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Manifesto() {
+  return (
+    <section className="os-manifesto" data-rise>
+      <div className="os-section-index"><span>01</span><b>WHY I BUILD</b></div>
+      <p className="os-manifesto-kicker">MỘT CÂU CHUYỆN KHÔNG BẮT ĐẦU TỪ CODE</p>
+      <h2>
+        Tôi không bắt đầu<br />từ <span>công nghệ.</span>
+      </h2>
+      <div className="os-manifesto-bottom">
+        <p>Tôi bắt đầu từ những việc bị lặp lại, những báo cáo đến muộn và những quyết định phải đưa ra khi chưa có đủ dữ liệu.</p>
+        <p>Rồi tôi học cách biến từng nút thắt thành quy trình. Từng quy trình thành hệ thống. Và từng hệ thống thành một cách làm việc nhẹ hơn.</p>
+      </div>
+      <div className="os-manifesto-orbit" aria-hidden="true"><span>OBSERVE</span><span>SYSTEMIZE</span><span>AUTOMATE</span></div>
+    </section>
+  );
+}
+
+function RoleCorridor() {
+  return (
+    <section className="os-roles" data-scroll-scene id="roles">
+      <div className="os-roles-sticky">
+        <div className="os-corridor-head">
+          <div className="os-section-index"><span>02</span><b>MULTIPLE ROLES</b></div>
+          <h2>Một đời sống.<br /><em>Nhiều vai trò.</em></h2>
+          <p>KÉO DỌC — DI CHUYỂN NGANG</p>
+        </div>
+        <div className="os-role-track">
+          {roles.map((role) => (
+            <article className={`os-role-card ${role.tone}`} key={role.no}>
+              <div className="os-role-grid" aria-hidden="true" />
+              <div className="os-role-meta"><span>{role.no}</span><b>{role.label}</b></div>
+              <div className="os-role-copy">
+                <h3>{role.title}</h3>
+                <p>{role.text}</p>
+              </div>
+              <div className="os-role-image"><span aria-hidden="true">{role.no}</span><img src={role.image} alt="" width={1024} height={1536} /></div>
+            </article>
+          ))}
+          <article className="os-role-card os-role-end">
+            <p>Tất cả những vai này<br />dùng chung một thứ:</p>
+            <h3>TƯ DUY<br />HỆ THỐNG.</h3>
+            <a href="#system">ĐI TIẾP VÀO LÕI <span>↓</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SystemCore() {
+  return (
+    <section className="os-system" data-scroll-scene data-steps={erpSteps.length} id="system">
+      <div className="os-system-sticky">
+        <div className="os-system-stage" aria-hidden="true">
+          <div className="os-core-halo halo-a" />
+          <div className="os-core-halo halo-b" />
+          <div className="os-core-lines"><i /><i /><i /><i /><i /><i /></div>
+          <div className="os-core">
+            <span className="os-core-scan" />
+            <b>ERP</b>
+            <i>NEXT</i>
+            <small>SYSTEM CORE / ONLINE</small>
+          </div>
+          {erpSteps.map((step, index) => (
+            <div className={`os-core-node node-${index + 1}`} key={step.no} style={{ "--node-o": `var(--step-${index})` } as React.CSSProperties}>
+              <i>{step.no}</i><span>{step.kicker}</span>
+            </div>
+          ))}
+        </div>
+        <div className="os-system-copy">
+          <div className="os-section-index"><span>03</span><b>ERP JOURNEY</b></div>
+          {erpSteps.map((step, index) => (
+            <article className="os-system-step" key={step.no} style={{ "--step-o": `var(--step-${index})` } as React.CSSProperties}>
+              <p>{step.no} / {step.kicker}</p>
+              <h2>{step.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
+              <div><p>{step.text}</p><strong>{step.metric}<small>{step.metricText}</small></strong></div>
+            </article>
+          ))}
+          <div className="os-step-rail" aria-hidden="true">{erpSteps.map((step, index) => <i key={step.no} style={{ opacity: `var(--step-${index})` }} />)}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WorkGrid() {
+  const tilt = (event: React.PointerEvent<HTMLElement>) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
-    heroRef.current?.style.setProperty("--rx", `${-y * 5}deg`);
-    heroRef.current?.style.setProperty("--ry", `${x * 7}deg`);
-    heroRef.current?.style.setProperty("--mx", `${x * 18}px`);
-    heroRef.current?.style.setProperty("--my", `${y * 14}px`);
+    event.currentTarget.style.setProperty("--card-rx", `${-y * 7}deg`);
+    event.currentTarget.style.setProperty("--card-ry", `${x * 9}deg`);
   };
-
   return (
-    <main className="site-shell">
-      <AmbientField />
-      <SiteHeader />
-
-      <section className="hero" onPointerMove={moveHero}>
-        <div className="hero-circuit" aria-hidden="true"><i /><i /><i /><i /></div>
-        <div className="hero-ghost-type" aria-hidden="true">ONE</div>
-        <div className="hero-copy">
-          <p className="eyebrow"><span>Human operating system / 2026</span> Nguyễn Huy Chiến</p>
-          <h1>
-            MỘT NGƯỜI.
-            <span>NHIỀU VAI.</span>
-            <em>MỘT HỆ THỐNG.</em>
-          </h1>
-          <p className="hero-lead">
-            Tôi xây hệ thống để công việc bớt phụ thuộc vào trí nhớ — và dùng công nghệ để một người có thể tạo ra nhiều giá trị hơn.
-          </p>
-          <div className="hero-cta-row">
-            <a className="primary-button" href="#erp">
-              <span>Xem hành trình ERP</span>
-              <b aria-hidden="true">↗</b>
-            </a>
-            <Link className="text-link" href="/blog">Đọc những điều tôi học được <span>→</span></Link>
-          </div>
-        </div>
-
-        <div className="hero-visual" ref={heroRef}>
-          <div className="hero-stage" aria-hidden="true">
-            <span>1</span>
-            <i>ERP / AI / OPS</i>
-            <b>01</b>
-          </div>
-          <div className="hero-depth-grid" aria-hidden="true" />
-          <div className="hero-scanline" aria-hidden="true" />
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-          <div className="image-aura" />
-          <img
-            className="hero-character"
-            src="/characters/multitask.webp"
-            alt="Nguyễn Huy Chiến trong hình tượng một người đảm nhiệm nhiều vai trò"
-            width={1024}
-            height={1536}
-          />
-          <div className="floating-card card-erp">
-            <span>01 / SYSTEM</span>
-            <strong>ERP BUILDER</strong>
-            <small>QUY TRÌNH → DỮ LIỆU → HÀNH ĐỘNG</small>
-          </div>
-          <div className="floating-card card-maker">
-            <span>02 / MAKER</span>
-            <strong>AI × AUTOMATION</strong>
-            <small>MAKE IT WORK. THEN MAKE IT BETTER.</small>
-          </div>
-          <div className="floating-card card-life">
-            <span>03 / LIFE</span>
-            <strong>CHA • CHỒNG • NGƯỜI HỌC</strong>
-          </div>
-          <div className="signal-pill"><i /> SIGNAL ONLINE</div>
-        </div>
-
-        <div className="hero-system-rail" aria-hidden="true">
-          <span>ERP BUILDER</span><i />
-          <span>OPERATIONS THINKER</span><i />
-          <span>AI MAKER</span><i />
-          <span>FATHER</span><i />
-          <b>ONE PERSON / MANY SYSTEMS</b>
-        </div>
-
-        <div className="hero-index" aria-hidden="true">
-          <span>HẢI PHÒNG</span>
-          <b>20°51′N</b>
-          <span>106°41′E</span>
-        </div>
-        <ScrollCue />
-      </section>
-
-      <section className="opening-statement" id="story">
-        <p className="section-code">00 — LỜI MỞ ĐẦU</p>
-        <div className="statement-grid">
-          <h2>Tôi không bắt đầu từ công nghệ.</h2>
-          <div>
-            <p>Tôi bắt đầu từ những việc bị lặp lại, những báo cáo đến muộn và những quyết định thiếu dữ liệu.</p>
-            <p>Rồi tôi học cách biến từng nút thắt thành quy trình, từng quy trình thành hệ thống, và từng hệ thống thành một cách làm việc nhẹ hơn.</p>
-          </div>
-        </div>
-        <div className="statement-marquee" aria-hidden="true">
-          <span>VẬN HÀNH • ERP • AI • TỰ ĐỘNG HÓA • DỮ LIỆU • CON NGƯỜI • </span>
-          <span>VẬN HÀNH • ERP • AI • TỰ ĐỘNG HÓA • DỮ LIỆU • CON NGƯỜI • </span>
-        </div>
-      </section>
-
-      <section className="role-chapters">
-        <div className="section-heading" data-reveal>
-          <p className="section-code dark-code">01 — MỘT NGƯỜI, NHIỀU VAI</p>
-          <h2>Không cân bằng.<br /><em>Chỉ là cùng một cuộc sống.</em></h2>
-          <p>Công việc, công nghệ và gia đình không nằm ở ba thế giới khác nhau. Chúng cùng dạy tôi cách quan sát, chăm chút và xây những thứ có ích.</p>
-        </div>
-
-        <div className="role-grid">
-          <article className="role-card role-card-wide" data-reveal>
-            <div className="role-copy">
-              <span>01 / SYSTEM BUILDER</span>
-              <h3>Ngồi giữa dữ liệu<br />và vận hành.</h3>
-              <p>Ba màn hình không làm công việc thông minh hơn. Một câu hỏi đúng và một luồng dữ liệu rõ ràng thì có.</p>
-              <a href="#erp">Xem hành trình ERP <b>↗</b></a>
-            </div>
-            <div className="role-image role-image-tech">
-              <img src="/characters/erp-builder.webp" alt="Nguyễn Huy Chiến làm việc với ba màn hình dữ liệu" width="900" height="1350" loading="lazy" />
-              <i className="role-scan" />
-            </div>
+    <section className="os-work" id="work">
+      <div className="os-work-head" data-rise>
+        <div className="os-section-index"><span>04</span><b>SELECTED SYSTEMS</b></div>
+        <h2>Những thứ<br />đang <em>chạy thật.</em></h2>
+        <p>Không phải concept. Đây là các bài toán vận hành tôi đã và đang biến thành hệ thống.</p>
+      </div>
+      <div className="os-project-grid">
+        {projects.map(([label, title, tags, no], index) => (
+          <article className={`os-project project-${index + 1}`} key={no} data-rise onPointerMove={tilt} onPointerLeave={(event) => { event.currentTarget.style.setProperty("--card-rx", "0deg"); event.currentTarget.style.setProperty("--card-ry", "0deg"); }}>
+            <div className="os-project-top"><span>{label}</span><b>{no}</b></div>
+            <h3>{title}</h3>
+            <div className="os-project-bottom"><p>{tags}</p><i>↗</i></div>
+            <div className="os-project-visual" aria-hidden="true"><i /><i /><i /><span>{index % 2 === 0 ? "◫" : "⌁"}</span></div>
           </article>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-          <article className="role-card role-card-tall" data-reveal>
-            <div className="role-copy">
-              <span>02 / FATHER</span>
-              <h3>Có những việc không thể tự động hóa.</h3>
-              <p>Thời gian dành cho con là một lời nhắc rất thật: công nghệ phải trả lại thời gian cho con người.</p>
+function Journal() {
+  return (
+    <section className="os-journal">
+      <div className="os-journal-head" data-rise>
+        <div className="os-section-index"><span>05</span><b>FIELD NOTES</b></div>
+        <h2>Ghi chép từ<br /><em>hiện trường.</em></h2>
+        <Link href="/blog">XEM TOÀN BỘ TẠP CHÍ <span>↗</span></Link>
+      </div>
+      <div className="os-issues">
+        {posts.slice(0, 3).map((post, index) => (
+          <Link className="os-issue" href={`/blog/${post.slug}`} key={post.slug} data-rise>
+            <div className="os-issue-cover">
+              <div className="os-issue-mast"><span>1 NGƯỜI</span><b>ISSUE / 00{index + 1}</b></div>
+              <img src={post.coverImage} alt="" width={1024} height={1536} />
+              <div className="os-issue-title"><i>{post.category}</i><h3>{post.title}</h3></div>
+              <span className="os-issue-metric">{post.metric}</span>
             </div>
-            <div className="role-image role-image-life">
-              <img src="/characters/father.webp" alt="Khoảnh khắc chăm sóc con trong gia đình" width="900" height="1350" loading="lazy" />
-            </div>
-          </article>
+            <div className="os-issue-meta"><span>{post.date}</span><b>ĐỌC BÀI ↗</b></div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-          <article className="role-card role-card-small" data-reveal>
-            <div className="role-image role-image-kitchen">
-              <img src="/characters/kitchen.webp" alt="Một khoảnh khắc đời thường trong bếp" width="900" height="1350" loading="lazy" />
-            </div>
-            <div className="role-copy">
-              <span>03 / EVERYDAY MAKER</span>
-              <h3>Làm, quan sát, rồi làm tốt hơn.</h3>
-            </div>
-          </article>
-        </div>
-      </section>
+function Finale() {
+  return (
+    <footer className="os-finale" data-rise>
+      <div className="os-finale-signal" aria-hidden="true"><i /><i /><i /><i /></div>
+      <p>1 NGƯỜI / OPEN SYSTEM / 2026</p>
+      <h2>KHÔNG CẦN LÀM<br />MỌI THỨ <em>MỘT MÌNH.</em></h2>
+      <div className="os-finale-bottom">
+        <p>Chỉ cần xây được một hệ thống để những gì đã học, đã làm và đã tạo ra tiếp tục sinh giá trị.</p>
+        <Link href="/tools">MỞ HỘP CÔNG CỤ <span>↗</span></Link>
+      </div>
+      <div className="os-footer-line"><span>© 2026 NGUYỄN HUY CHIẾN</span><span>HẢI PHÒNG, VIỆT NAM</span><span>ONE PERSON / MANY SYSTEMS</span></div>
+    </footer>
+  );
+}
 
-      <section className="erp-journey" id="erp">
-        <div className="erp-grid-bg" aria-hidden="true" />
-        <div className="erp-intro" data-reveal>
-          <p className="section-code">02 — HÀNH TRÌNH ERP</p>
-          <h2>ERP không bắt đầu bằng phần mềm.</h2>
-          <p>Nó bắt đầu bằng việc nhìn thẳng vào cách doanh nghiệp đang vận hành — cả phần trơn tru lẫn những chỗ mọi người đã quen với sự bất tiện.</p>
-        </div>
-
-        <div className="erp-terminal" data-reveal>
-          <div className="terminal-top"><span>OPERATING_SYSTEM.LOG</span><i /><i /><i /></div>
-          <div className="terminal-map">
-            <div className="terminal-core"><span>ERP</span><small>SOURCE OF TRUTH</small></div>
-            <div className="terminal-node node-sales">BÁN HÀNG</div>
-            <div className="terminal-node node-stock">KHO</div>
-            <div className="terminal-node node-account">KẾ TOÁN</div>
-            <div className="terminal-node node-factory">SẢN XUẤT</div>
-            <div className="terminal-node node-people">NHÂN SỰ</div>
-            <svg viewBox="0 0 600 360" aria-hidden="true">
-              <path d="M300 180 L120 80 M300 180 L480 70 M300 180 L520 238 M300 180 L300 320 M300 180 L80 250" />
-            </svg>
-            <div className="data-pulse pulse-one" /><div className="data-pulse pulse-two" /><div className="data-pulse pulse-three" />
-          </div>
-          <div className="terminal-status"><span><i /> DATA FLOW ACTIVE</span><span>API: 200 OK</span><span>AUTOMATION: READY</span></div>
-        </div>
-
-        <div className="journey-list">
-          {timeline.map((item) => (
-            <article key={item.year} data-reveal>
-              <span>{item.year}</span>
-              <div><small>PHASE {item.year}</small><h3>{item.title}</h3><p>{item.text}</p></div>
-              <b>↗</b>
-            </article>
-          ))}
-        </div>
-
-        <blockquote data-reveal>
-          <span>“</span>
-          <p>Tôi không theo đuổi một hệ thống hoàn hảo. Tôi theo đuổi một hệ thống có thể thay đổi cùng doanh nghiệp.</p>
-        </blockquote>
-      </section>
-
-      <section className="work-section" id="work">
-        <div className="section-heading work-heading" data-reveal>
-          <p className="section-code dark-code">03 — NHỮNG THỨ ĐANG XÂY</p>
-          <h2>Không chỉ là ý tưởng.<br /><em>Là những thứ đang chạy.</em></h2>
-          <p>Mỗi dự án là một cách trả lời cho một nút thắt vận hành cụ thể.</p>
-        </div>
-        <div className="project-grid">
-          {projects.map((project, index) => (
-            <article className={`project-card ${project.className}`} key={project.code} data-reveal>
-              <div className="project-top"><span>{project.code}</span><i>{project.tag}</i></div>
-              <div className="project-index">0{index + 1}</div>
-              <h3>{project.title}</h3>
-              <p>{project.text}</p>
-              <span className="project-arrow">↗</span>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="one-person-manifesto">
-        <div className="manifesto-sphere" aria-hidden="true"><span>1</span><i /><i /><i /></div>
-        <div className="manifesto-copy" data-reveal>
-          <p className="section-code">04 — 1NGUOI.COM</p>
-          <h2>Một người<br />không có nghĩa<br />là <em>một mình.</em></h2>
-          <p>Đó là một cách làm việc: dùng nền tảng mở, AI, tự động hóa và cộng đồng để khuếch đại năng lực cá nhân.</p>
-          <div className="manifesto-values"><span>01. HỌC CÔNG KHAI</span><span>02. XÂY THỨ HỮU ÍCH</span><span>03. CHIA SẺ CÁCH LÀM</span></div>
-        </div>
-      </section>
-
-      <section className="journal-section" id="journal">
-        <div className="journal-head" data-reveal>
-          <div><p className="section-code dark-code">05 — NHẬT KÝ XÂY HỆ THỐNG</p><h2>Ghi lại để<br />nghĩ rõ hơn.</h2></div>
-          <Link className="circle-link" href="/blog"><span>XEM TẤT CẢ</span><b>↗</b></Link>
-        </div>
-        <div className="post-list">
-          {posts.slice(0, 3).map((post) => (
-            <Link className={`post-row accent-${post.accent}`} href={`/blog/${post.slug}`} key={post.slug} data-reveal>
-              <span className="post-number">{post.number}</span>
-              <div className="post-row-main"><div><span>{post.category}</span><i>{post.date}</i></div><h3>{post.title}</h3><p>{post.excerpt}</p></div>
-              <span className="post-go">↗</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="tools-preview">
-        <div className="tools-preview-head" data-reveal>
-          <p className="section-code">06 — TOOLBOX</p>
-          <h2>Không chỉ kể.<br />Còn có thứ để dùng.</h2>
-          <Link href="/tools">MỞ KHO CÔNG CỤ <span>↗</span></Link>
-        </div>
-        <div className="tools-strip">
-          {toolsDirectory.slice(0, 3).map((tool) => (
-            <Link className={`tool-mini accent-${tool.accent}`} href={tool.status === "Dùng ngay" ? `/tools/${tool.slug}` : "/tools"} key={tool.slug} data-reveal>
-              <span className="tool-symbol">{tool.symbol}</span>
-              <i>{tool.category}</i>
-              <h3>{tool.title}</h3>
-              <p>{tool.description}</p>
-              <b>{tool.status} ↗</b>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <SiteFooter />
+export default function HomeExperience() {
+  useScrollScene();
+  return (
+    <main className="os-shell">
+      <PointerGlow />
+      <Header />
+      <ScrollProgress />
+      <Portal />
+      <Manifesto />
+      <RoleCorridor />
+      <SystemCore />
+      <WorkGrid />
+      <Journal />
+      <Finale />
+      <div className="os-noise" aria-hidden="true" />
     </main>
   );
 }
