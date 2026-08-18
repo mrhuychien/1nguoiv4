@@ -14,6 +14,10 @@ export type Post = {
   date: string;
   readTime: string;
   accent: string;
+  coverImage: string;
+  metric: string;
+  metricLabel: string;
+  coverCaption: string;
   sections: PostSection[];
 };
 
@@ -27,6 +31,10 @@ export const posts: Post[] = [
     date: "18.08.2026",
     readTime: "7 phút",
     accent: "acid",
+    coverImage: "/characters/multitask.webp",
+    metric: "02′",
+    metricLabel: "Từ ý tưởng đến giao diện",
+    coverCaption: "Tùy biến không code / Field note 001",
     sections: [
       {
         paragraphs: [
@@ -64,6 +72,10 @@ export const posts: Post[] = [
     date: "12.08.2026",
     readTime: "9 phút",
     accent: "orange",
+    coverImage: "/characters/erp-builder.webp",
+    metric: "OPEN",
+    metricLabel: "Kiến trúc có thể thay đổi",
+    coverCaption: "ERP như một nền tảng vận hành / Field note 002",
     sections: [
       {
         paragraphs: [
@@ -99,6 +111,10 @@ export const posts: Post[] = [
     date: "06.08.2026",
     readTime: "6 phút",
     accent: "cyan",
+    coverImage: "/characters/multitask.webp",
+    metric: "01",
+    metricLabel: "Người × hệ sinh thái",
+    coverCaption: "Con người, dữ liệu và AI / Field note 003",
     sections: [
       {
         paragraphs: [
@@ -132,6 +148,10 @@ export const posts: Post[] = [
     date: "31.07.2026",
     readTime: "5 phút",
     accent: "violet",
+    coverImage: "/characters/erp-builder.webp",
+    metric: "03",
+    metricLabel: "Lớp dữ liệu vận hành",
+    coverCaption: "AI → kiểm tra → ERPNext / Field note 004",
     sections: [
       {
         paragraphs: [

@@ -181,8 +181,10 @@ export default function HomeExperience() {
       <SiteHeader />
 
       <section className="hero" onPointerMove={moveHero}>
+        <div className="hero-circuit" aria-hidden="true"><i /><i /><i /><i /></div>
+        <div className="hero-ghost-type" aria-hidden="true">ONE</div>
         <div className="hero-copy">
-          <p className="eyebrow"><span>Xin chào, tôi là</span> Nguyễn Huy Chiến</p>
+          <p className="eyebrow"><span>Human operating system / 2026</span> Nguyễn Huy Chiến</p>
           <h1>
             MỘT NGƯỜI.
             <span>NHIỀU VAI.</span>
@@ -201,6 +203,13 @@ export default function HomeExperience() {
         </div>
 
         <div className="hero-visual" ref={heroRef}>
+          <div className="hero-stage" aria-hidden="true">
+            <span>1</span>
+            <i>ERP / AI / OPS</i>
+            <b>01</b>
+          </div>
+          <div className="hero-depth-grid" aria-hidden="true" />
+          <div className="hero-scanline" aria-hidden="true" />
           <div className="orbit orbit-one" />
           <div className="orbit orbit-two" />
           <div className="image-aura" />
@@ -226,6 +235,14 @@ export default function HomeExperience() {
             <strong>CHA • CHỒNG • NGƯỜI HỌC</strong>
           </div>
           <div className="signal-pill"><i /> SIGNAL ONLINE</div>
+        </div>
+
+        <div className="hero-system-rail" aria-hidden="true">
+          <span>ERP BUILDER</span><i />
+          <span>OPERATIONS THINKER</span><i />
+          <span>AI MAKER</span><i />
+          <span>FATHER</span><i />
+          <b>ONE PERSON / MANY SYSTEMS</b>
         </div>
 
         <div className="hero-index" aria-hidden="true">
