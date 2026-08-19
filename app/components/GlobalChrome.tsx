@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 
 const destinations = [
   { label: "Trang chủ", href: "/", code: "H" },
-  { label: "Hành trình ERP", href: "/#erp", code: "E" },
-  { label: "Dự án", href: "/#work", code: "W" },
+  { label: "Hành trình ERP", href: "/#flow", code: "E" },
+  { label: "Thế giới", href: "/#worlds", code: "W" },
   { label: "Bài viết", href: "/blog", code: "B" },
   { label: "Công cụ", href: "/tools", code: "T" },
   { label: "Bàn viết", href: "/studio", code: "S" },

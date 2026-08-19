@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- local magazine covers are served directly by Sites. */
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { posts } from "../content";

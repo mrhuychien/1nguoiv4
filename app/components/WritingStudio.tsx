@@ -10,10 +10,13 @@ export default function WritingStudio() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("1nguoi-writing-draft");
-    if (stored) {
-      try { setDraft(JSON.parse(stored) as Draft); } catch { /* bỏ qua bản nháp lỗi */ }
-    }
+    const restoreDraft = window.setTimeout(() => {
+      const stored = window.localStorage.getItem("1nguoi-writing-draft");
+      if (stored) {
+        try { setDraft(JSON.parse(stored) as Draft); } catch { /* bỏ qua bản nháp lỗi */ }
+      }
+    }, 0);
+    return () => window.clearTimeout(restoreDraft);
   }, []);
 
   const update = (key: keyof Draft, value: string) => { setDraft((current) => ({ ...current, [key]: value })); setSaved(false); };

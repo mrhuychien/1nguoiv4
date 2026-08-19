@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+/* eslint-disable @next/next/no-img-element -- local magazine covers are served directly by Sites. */
 import { notFound } from "next/navigation";
 import { InnerHeader, SiteFooter } from "../../components/GlobalChrome";
 import { posts } from "../../content";
