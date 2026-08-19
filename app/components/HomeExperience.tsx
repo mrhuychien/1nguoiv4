@@ -101,98 +101,127 @@ function Header() {
   );
 }
 
-function Hero() {
-  return (
-    <section className="nv-hero" id="top">
-      <div className="nv-hero-grid" aria-hidden="true" />
-      <div className="nv-hero-copy">
-        <div className="nv-eyebrow"><span>NGUYỄN HUY CHIẾN</span><i />HẢI PHÒNG / VIỆT NAM</div>
-        <h1><span>MỘT NGƯỜI.</span><span>NHIỀU HỆ</span><span>ĐANG <em>CHẠY.</em></span></h1>
-        <div className="nv-hero-intro">
-          <b>01 / A LIVING PORTFOLIO</b>
-          <p>Tôi xây hệ thống để công việc bớt phụ thuộc vào trí nhớ — và để một người có thể tạo ra nhiều giá trị hơn.</p>
-        </div>
-      </div>
-      <div className="nv-hero-stage">
-        <div className="nv-stage-orbit orbit-a" /><div className="nv-stage-orbit orbit-b" />
-        <VideoShell src="/motion/multitask.mp4" eager />
-        <span className="nv-float-tag tag-a">ERP / OPS</span>
-        <span className="nv-float-tag tag-b">AI / DATA</span>
-        <span className="nv-float-tag tag-c">HUMAN / CORE</span>
-      </div>
-      <div className="nv-hero-bottom"><span>KÉO ĐỂ ĐI VÀO HỆ THỐNG</span><i><b /></i><span>ISO / 45° &nbsp; MOTION / ON</span></div>
-    </section>
-  );
-}
-
-function WorldJourney() {
+function SceneHero() {
   const rootRef = useRef<HTMLElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const activeRef = useRef(0);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
-    let smooth = 0;
-    let current = -1;
+    let scheduled = false;
 
-    const tick = () => {
-      const travel = Math.max(1, root.offsetHeight - innerHeight);
-      const target = Math.min(1, Math.max(0, (scrollY - root.offsetTop) / travel));
-      smooth += (target - smooth) * (reduceMotion ? 1 : 0.105);
-      const scene = Math.min(worlds.length - 1, Math.max(0, Math.round(smooth * (worlds.length - 1))));
-      root.style.setProperty("--journey", String(smooth));
-      root.style.setProperty("--world-color", worlds[scene].color);
-      worlds.forEach((_, index) => {
-        const center = index / (worlds.length - 1);
-        const alpha = Math.max(0, 1 - Math.abs(smooth - center) * 4.1);
-        const shell = videoRefs.current[index]?.parentElement?.parentElement;
-        shell?.style.setProperty("--scene-alpha", String(alpha));
-        shell?.style.setProperty("--scene-scale", String(0.9 + alpha * 0.1));
-      });
-      if (scene !== current) {
-        current = scene;
+    const update = () => {
+      const travel = Math.max(1, root.offsetHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, (window.scrollY - root.offsetTop) / travel));
+      const scene = Math.min(worlds.length - 1, Math.max(0, Math.round(progress * (worlds.length - 1))));
+      root.style.setProperty("--hero-progress", String(progress));
+      root.style.setProperty("--scene-color", worlds[scene].color);
+      if (scene !== activeRef.current) {
+        activeRef.current = scene;
         setActive(scene);
-        videoRefs.current.forEach((video, index) => {
-          if (!video || reduceMotion) return;
-          if (index === scene) void video.play().catch(() => undefined);
-          else video.pause();
-        });
       }
-      frame = requestAnimationFrame(tick);
+      scheduled = false;
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      frame = requestAnimationFrame(update);
+    };
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      if (index === active && !reduceMotion) void video.play().catch(() => undefined);
+      else video.pause();
+    });
+  }, [active]);
+
+  const goToScene = (index: number) => {
+    const root = rootRef.current;
+    if (!root) return;
+    const travel = Math.max(1, root.offsetHeight - window.innerHeight);
+    const top = root.offsetTop + (index / (worlds.length - 1)) * travel;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
   return (
-    <section className="nv-world-journey" id="worlds" ref={rootRef}>
-      <div className="nv-world-sticky">
-        <div className="nv-world-rail" aria-hidden="true"><span>00</span><i><b style={{ height: `${((active + 1) / worlds.length) * 100}%` }} /></i><span>04</span></div>
-        <div className="nv-world-copy">
-          <p className="nv-section-code">02 — FOUR WORLDS / ONE PERSON</p>
-          {worlds.map((world, index) => (
-            <article className={active === index ? "is-active" : ""} key={world.no}>
-              <div><span>{world.no} / 04</span><i>{world.kicker}</i></div>
-              <h2>{world.title}</h2>
-              <p>{world.body}</p>
-              <ul>{world.meta.map((item) => <li key={item}>{item}</li>)}</ul>
-            </article>
-          ))}
+    <section className="nv-scene-hero" id="worlds" ref={rootRef} style={{ "--scene-color": worlds[active].color } as CSSProperties}>
+      <div className="nv-scene-sticky">
+        <div className="nv-scene-backdrop" aria-hidden="true"><i /><i /><i /></div>
+        <div className="nv-scene-layout">
+          <div className="nv-scene-copy">
+            <div className="nv-scene-eyebrow"><span>NGUYỄN HUY CHIẾN</span><i />HẢI PHÒNG / VIỆT NAM</div>
+            <p className="nv-scene-overline">MỘT NGƯỜI / BỐN THẾ GIỚI ĐANG CHẠY</p>
+            <div className="nv-scene-copy-stack">
+              {worlds.map((world, index) => (
+                <article
+                  className={index === active ? "is-active" : index < active ? "is-before" : "is-after"}
+                  aria-hidden={index !== active}
+                  key={world.no}
+                >
+                  <div><span>{world.no} / 04</span><i>{world.kicker}</i></div>
+                  <h1>{world.title}</h1>
+                  <p>{world.body}</p>
+                  <ul>{world.meta.map((item) => <li key={item}>{item}</li>)}</ul>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="nv-scene-stage">
+            <div className="nv-scene-orbit" aria-hidden="true"><i /><i /></div>
+            <div className="nv-scene-deck">
+              {worlds.map((world, index) => (
+                <div
+                  className={`nv-scene-panel ${index === active ? "is-active" : index < active ? "is-before" : "is-after"}`}
+                  aria-hidden={index !== active}
+                  key={world.no}
+                >
+                  <VideoShell
+                    src={world.video}
+                    eager={index === 0}
+                    videoRef={(node) => { videoRefs.current[index] = node; }}
+                  />
+                  <span className="nv-scene-caption">SCENE {world.no} / LIVE MOTION</span>
+                </div>
+              ))}
+            </div>
+            <strong className="nv-scene-ghost" aria-hidden="true">{worlds[active].no}</strong>
+          </div>
         </div>
-        <div className="nv-world-stage">
-          <div className="nv-world-floor" aria-hidden="true" />
+
+        <div className="nv-scene-controls" aria-label="Chọn cảnh mở đầu">
           {worlds.map((world, index) => (
-            <VideoShell
+            <button
+              className={index === active ? "is-active" : ""}
+              type="button"
+              aria-label={`Mở cảnh ${world.no}: ${world.title}`}
+              aria-current={index === active ? "step" : undefined}
+              onClick={() => goToScene(index)}
               key={world.no}
-              src={world.video}
-              videoRef={(node) => { videoRefs.current[index] = node; }}
-            />
+            >
+              <span>{world.no}</span><b>{world.kicker.replace("THE ", "")}</b><i />
+            </button>
           ))}
-          <div className="nv-world-hud"><span>SCENE / {worlds[active].no}</span><span>DEPTH / 45°</span><span>MOTION / LIVE</span></div>
         </div>
+        <div className="nv-scene-progress" aria-hidden="true"><span style={{ width: `${((active + 1) / worlds.length) * 100}%` }} /></div>
+        <div className="nv-scene-scroll"><span>KÉO ĐỂ CHUYỂN CẢNH</span><i>↓</i></div>
       </div>
     </section>
   );
@@ -201,7 +230,7 @@ function WorldJourney() {
 function Principle() {
   return (
     <section className="nv-principle">
-      <p className="nv-section-code">03 — THE PRINCIPLE</p>
+      <p className="nv-section-code">02 — THE PRINCIPLE</p>
       <div className="nv-principle-title"><span>KHÔNG XÂY</span><span>PHẦN MỀM.</span><span>XÂY KHẢ NĂNG</span><span><em>THAY ĐỔI.</em></span></div>
       <div className="nv-principle-note"><b>MANIFESTO / 001</b><p>Mỗi hệ thống bắt đầu từ một điểm ma sát thật. Mỗi công cụ phải dẫn tới một hành vi tốt hơn. Mỗi bài viết là một lần kiểm nghiệm lại điều mình tưởng đã hiểu.</p></div>
       <div className="nv-data-cube" aria-hidden="true"><i /><i /><i /><b>1</b><span>HUMAN<br />OS</span></div>
@@ -212,7 +241,7 @@ function Principle() {
 function Flow() {
   return (
     <section className="nv-flow" id="flow">
-      <header><p className="nv-section-code">04 — ERP JOURNEY / OPERATING FLOW</p><h2>TỪ MA SÁT<br />TỚI <em>DÒNG CHẢY.</em></h2><p>Một quy trình đủ tốt phải nhìn được, đo được và tiếp tục thay đổi được.</p></header>
+      <header><p className="nv-section-code">03 — ERP JOURNEY / OPERATING FLOW</p><h2>TỪ MA SÁT<br />TỚI <em>DÒNG CHẢY.</em></h2><p>Một quy trình đủ tốt phải nhìn được, đo được và tiếp tục thay đổi được.</p></header>
       <div className="nv-flow-line" aria-hidden="true"><i /></div>
       <div className="nv-flow-steps">
         {flow.map((step, index) => <article key={step[0]} style={{ "--step": index } as CSSProperties}><span>{step[0]}</span><b>{step[1]}</b><p>{step[2]}</p><i>↘</i></article>)}
@@ -224,7 +253,7 @@ function Flow() {
 function Toolbox() {
   return (
     <section className="nv-toolbox">
-      <header><p className="nv-section-code">05 — OPEN TOOLBOX</p><h2>KHÔNG CHỈ VIẾT.<br /><em>XÂY THỨ DÙNG ĐƯỢC.</em></h2><Link href="/tools">MỞ TOÀN BỘ CÔNG CỤ ↗</Link></header>
+      <header><p className="nv-section-code">04 — OPEN TOOLBOX</p><h2>KHÔNG CHỈ VIẾT.<br /><em>XÂY THỨ DÙNG ĐƯỢC.</em></h2><Link href="/tools">MỞ TOÀN BỘ CÔNG CỤ ↗</Link></header>
       <div className="nv-tool-grid">
         {toolsDirectory.map((tool, index) => {
           const content = <><div><span>0{index + 1}</span><i>{tool.symbol}</i></div><small>{tool.category}</small><h3>{tool.title}</h3><p>{tool.description}</p><b>{tool.status} ↗</b></>;
@@ -238,7 +267,7 @@ function Toolbox() {
 function Journal() {
   return (
     <section className="nv-journal">
-      <header><p className="nv-section-code">06 — FIELD NOTES / E-MAGAZINE</p><h2>NHỮNG ĐIỀU<br />ĐÃ QUA <em>THỰC TẾ.</em></h2><Link href="/blog">ĐỌC TOÀN BỘ TẠP CHÍ ↗</Link></header>
+      <header><p className="nv-section-code">05 — FIELD NOTES / E-MAGAZINE</p><h2>NHỮNG ĐIỀU<br />ĐÃ QUA <em>THỰC TẾ.</em></h2><Link href="/blog">ĐỌC TOÀN BỘ TẠP CHÍ ↗</Link></header>
       <div className="nv-issues">
         {posts.slice(0, 3).map((post, index) => (
           <Link className={`nv-issue issue-${index + 1}`} href={`/blog/${post.slug}`} key={post.slug}>
@@ -260,7 +289,7 @@ function Finale() {
   return (
     <footer className="nv-finale">
       <div className="nv-finale-grid" aria-hidden="true" />
-      <p>07 — ONE PERSON / MANY SYSTEMS</p>
+      <p>06 — ONE PERSON / MANY SYSTEMS</p>
       <h2>THINK IN<br /><span>SYSTEMS.</span><br />BUILD IN <em>PUBLIC.</em></h2>
       <div><p>Tôi tiếp tục học, xây và ghi lại những thứ giúp một người làm việc lớn hơn mà không phải tự làm mọi thứ.</p><Link href="/blog">BẮT ĐẦU TỪ MỘT BÀI VIẾT <span>↗</span></Link></div>
       <small>© 2026 NGUYỄN HUY CHIẾN &nbsp; / &nbsp; HẢI PHÒNG, VIỆT NAM &nbsp; / &nbsp; 1NGUOI.COM</small>
@@ -289,5 +318,5 @@ export default function HomeExperience() {
     return () => { removeEventListener("pointermove", onPointer); cancelAnimationFrame(frame); };
   }, []);
 
-  return <main className="nv-site" ref={rootRef}><Header /><Hero /><WorldJourney /><Principle /><Flow /><Toolbox /><Journal /><Finale /></main>;
+  return <main className="nv-site" ref={rootRef}><Header /><SceneHero /><Principle /><Flow /><Toolbox /><Journal /><Finale /></main>;
 }
