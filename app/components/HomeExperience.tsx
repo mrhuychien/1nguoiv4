@@ -46,10 +46,10 @@ const chapters = [
 ];
 
 const worlds = [
-  { no: "01", kicker: "OPERATING ROOM", title: "Một người, nhiều vai vận hành.", body: "Tôi đứng ở nơi dữ liệu, con người, hàng hóa, tiến độ và những ngoại lệ va vào nhau mỗi ngày.", image: "/characters/multitask.webp", tone: "lime", tags: ["OPERATIONS", "DECISION", "SYSTEM THINKING"] },
-  { no: "02", kicker: "ERP FACTORY", title: "Một lõi dữ liệu cho nhà máy.", body: "ERPNext nối bán hàng, kho, mua hàng, kế toán, sản xuất và chấm công thành một dòng vận hành chung.", image: "/characters/erp-builder.webp", tone: "blue", tags: ["ERPNEXT", "FRAPPE", "MANUFACTURING"] },
-  { no: "03", kicker: "EVERYDAY LAB", title: "Công nghệ phải trả lại thời gian sống.", body: "Sau màn hình vẫn là một người nấu cơm, chăm con, đọc sách và học tiếp. Hệ thống tốt phải làm đời sống nhẹ hơn.", image: "/characters/kitchen.webp", tone: "orange", tags: ["FAMILY", "LEARNING", "BALANCE"] },
-  { no: "04", kicker: "HUMAN CORE", title: "Kiên nhẫn cũng là một năng lực thiết kế.", body: "Những bài học quan trọng về quan sát, hiện diện và cải tiến đôi khi đến từ gia đình, không phải phòng họp.", image: "/characters/father.webp", tone: "violet", tags: ["FATHER", "PATIENCE", "GROWTH"] },
+  { no: "01", kicker: "OPERATING ROOM", title: "Một người, nhiều vai vận hành.", body: "Tôi đứng ở nơi dữ liệu, con người, hàng hóa, tiến độ và những ngoại lệ va vào nhau mỗi ngày.", image: "/characters/multitask.webp", tone: "lime", tags: ["OPERATIONS", "DECISION", "SYSTEM THINKING"], signals: ["OPS", "ERP", "AI"] },
+  { no: "02", kicker: "ERP FACTORY", title: "Một lõi dữ liệu cho nhà máy.", body: "ERPNext nối bán hàng, kho, mua hàng, kế toán, sản xuất và chấm công thành một dòng vận hành chung.", image: "/characters/erp-builder.webp", tone: "blue", tags: ["ERPNEXT", "FRAPPE", "MANUFACTURING"], signals: ["LIVE", "DATA", "FLOW"] },
+  { no: "03", kicker: "EVERYDAY LAB", title: "Công nghệ phải trả lại thời gian sống.", body: "Sau màn hình vẫn là một người nấu cơm, chăm con, đọc sách và học tiếp. Hệ thống tốt phải làm đời sống nhẹ hơn.", image: "/characters/kitchen.webp", tone: "orange", tags: ["FAMILY", "LEARNING", "BALANCE"], signals: ["TIME", "CARE", "LIFE"] },
+  { no: "04", kicker: "HUMAN CORE", title: "Kiên nhẫn cũng là một năng lực thiết kế.", body: "Những bài học quan trọng về quan sát, hiện diện và cải tiến đôi khi đến từ gia đình, không phải phòng họp.", image: "/characters/father.webp", tone: "violet", tags: ["FATHER", "PATIENCE", "GROWTH"], signals: ["CARE", "LEARN", "GROW"] },
 ];
 
 const flowSteps = [
@@ -102,6 +102,8 @@ function IsoWorld({ onReady }: { onReady: () => void }) {
       previousScroll = smoothScroll;
       journey.style.setProperty("--iso-p", String(progress));
       journey.style.setProperty("--iso-v", String(velocity));
+      journey.style.setProperty("--iso-mx", String(pointer.x));
+      journey.style.setProperty("--iso-my", String(pointer.y));
       chapters.forEach((_, index) => journey.style.setProperty(`--chapter-${index}`, String(weight(progress, index / (chapters.length - 1)))));
       document.documentElement.style.setProperty("--iso-page", String(clamp(smoothScroll / Math.max(1, document.documentElement.scrollHeight - innerHeight))));
       renderWorld(time, delta, progress, velocity);
@@ -221,7 +223,7 @@ function Manifesto() {
 }
 
 function Worlds() {
-  return <section className="iso-worlds" id="worlds"><header className="iso-worlds-head iso-reveal"><div className="iso-section-label"><span>06</span> FOUR ROOMS / ONE LIFE</div><h2>Bốn căn phòng.<br /><em>Một người ở giữa.</em></h2><p>Công việc và đời sống không phải hai hệ riêng biệt. Chúng cùng tác động lên cách tôi quan sát, thiết kế và ra quyết định.</p></header><div className="iso-room-list">{worlds.map((world) => <article className={`iso-room tone-${world.tone} iso-reveal`} key={world.no}><div className="iso-room-visual"><div className="iso-room-grid" /><div className="iso-room-platform"><i /><i /><i /></div><div className="iso-room-orbit"><b /><b /><b /></div><img src={world.image} alt="" width={1024} height={1536} /><strong>{world.no}</strong><span>LIVE / {world.kicker}</span></div><div className="iso-room-copy"><div><span>{world.no} / 04</span><b>{world.kicker}</b></div><h3>{world.title}</h3><p>{world.body}</p><ul>{world.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul></div></article>)}</div></section>;
+  return <section className="iso-worlds" id="worlds"><header className="iso-worlds-head iso-reveal"><div className="iso-section-label"><span>06</span> FOUR ROOMS / ONE LIFE</div><h2>Bốn căn phòng.<br /><em>Một người ở giữa.</em></h2><p>Công việc và đời sống không phải hai hệ riêng biệt. Chúng cùng tác động lên cách tôi quan sát, thiết kế và ra quyết định.</p></header><div className="iso-room-list">{worlds.map((world, worldIndex) => <article className={`iso-room tone-${world.tone} iso-reveal`} key={world.no}><div className={`iso-room-visual scene-${worldIndex}`} data-diorama><div className="iso-room-grid" /><strong>{world.no}</strong><span>LIVE / {world.kicker}</span><div className="iso-diorama-stage" aria-hidden="true"><div className="iso-diorama-shadow" /><div className="iso-room-platform"><i /><i /><i /></div><div className="iso-room-orbit"><b /><b /><b /></div><div className="iso-image-volume"><div className="iso-image-float"><img src={world.image} alt="" width={1024} height={1536} /><i className="iso-image-glint" /></div></div><div className="iso-motion-rails"><i /><i /><i /></div><div className="iso-motion-packets">{Array.from({ length: 6 }, (_, index) => <i key={index} style={{ "--packet": index, "--delay": `${index * -0.76}s`, "--spread": `${(index - 2.5) * 8}px` } as CSSProperties} />)}</div><div className="iso-motion-signals">{world.signals.map((signal, index) => <b key={signal} style={{ "--signal": index, "--signal-z": `${170 + index * 15}px`, "--delay": `${index * -1.3}s` } as CSSProperties}>{signal}</b>)}</div><div className="iso-diorama-axis"><i>X</i><i>Y</i><i>Z</i></div></div><div className="iso-diorama-status"><span>MOTION / ON</span><i /><b>DEPTH {String(worldIndex + 1).padStart(2, "0")}</b></div></div><div className="iso-room-copy"><div><span>{world.no} / 04</span><b>{world.kicker}</b></div><h3>{world.title}</h3><p>{world.body}</p><ul>{world.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul></div></article>)}</div></section>;
 }
 
 function Flow() {
@@ -244,5 +246,35 @@ export default function HomeExperience() {
   const [ready, setReady] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
   useEffect(() => { const nodes = Array.from(document.querySelectorAll<HTMLElement>(".iso-reveal")); const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add("is-visible"); }), { threshold: 0.12 }); nodes.forEach((node) => observer.observe(node)); return () => observer.disconnect(); }, []);
+  useEffect(() => {
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-diorama]"));
+    if (!nodes.length) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    let frame = 0;
+    let previous = performance.now();
+    const onPointer = (event: PointerEvent) => { pointer.tx = event.clientX / window.innerWidth - 0.5; pointer.ty = event.clientY / window.innerHeight - 0.5; };
+    const tick = (time: number) => {
+      const delta = Math.min(0.05, Math.max(0.001, (time - previous) / 1000));
+      previous = time;
+      const damping = reduceMotion ? 1 : 1 - Math.exp(-delta * 5.8);
+      pointer.x += (pointer.tx - pointer.x) * damping;
+      pointer.y += (pointer.ty - pointer.y) * damping;
+      const viewport = window.innerHeight;
+      nodes.forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        if (rect.bottom < -viewport * 0.35 || rect.top > viewport * 1.35) return;
+        const progress = reduceMotion ? 0.5 : clamp((viewport - rect.top) / (viewport + rect.height));
+        node.style.setProperty("--room-p", String(progress));
+        node.style.setProperty("--room-shift", `${reduceMotion ? 0 : (0.5 - progress) * 42}px`);
+        node.style.setProperty("--room-rx", `${reduceMotion ? 0 : pointer.y * -5 + (progress - 0.5) * 2}deg`);
+        node.style.setProperty("--room-ry", `${reduceMotion ? 0 : pointer.x * 7 + (progress - 0.5) * 5}deg`);
+      });
+      frame = requestAnimationFrame(tick);
+    };
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    frame = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("pointermove", onPointer); };
+  }, []);
   return <main className={ready ? "iso-shell is-ready" : "iso-shell"}><div className="iso-loader"><b>1</b><span>ASSEMBLING ISOMETRIC WORLD</span><i /></div><div className="iso-noise" aria-hidden="true" /><IsoHeader /><Hero onReady={onReady} /><Manifesto /><Worlds /><Flow /><Toolbelt /><Journal /><Finale /></main>;
 }
