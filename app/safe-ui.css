@@ -699,6 +699,7 @@ body {
   max-width: 1120px;
   margin-top: 58px;
   font-size: clamp(3.25rem, 7.2vw, 8.25rem);
+  font-weight: 900;
   line-height: 1.02;
   letter-spacing: -0.05em;
 }
@@ -756,6 +757,7 @@ body {
 .nv-journal h2,
 .site-footer h2 {
   font-size: clamp(2.8rem, 5.4vw, 6rem);
+  font-weight: 900;
   line-height: 1.06;
   letter-spacing: -0.045em;
 }
@@ -862,6 +864,7 @@ body {
 .nv-finale h2 {
   margin: 54px 0 70px;
   font-size: clamp(3.1rem, 7vw, 7.8rem);
+  font-weight: 900;
   line-height: 1;
   letter-spacing: -0.05em;
 }
